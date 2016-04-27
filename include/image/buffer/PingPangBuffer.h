@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
+#include <iostream>
 //#include "image/utility/DebugPrint.h"
 
 #define PING 0
@@ -152,7 +153,7 @@ int PingPangBuffer<T>::GetWritePointer(T ** p)
 	//写入Ping
 	if ((PING == m_nWriteFlag) && (EMPTY == m_nPingFullFlag))
 	{
-
+		//std::cout<<"写入Ping"<<std::endl;
 		//返回缓冲区标志
 		*p = m_pPingBuffer;
 
@@ -166,6 +167,7 @@ int PingPangBuffer<T>::GetWritePointer(T ** p)
 	if ((PANG == m_nWriteFlag) && (EMPTY == m_nPangFullFlag))
 	{
 		//返回缓冲区标志
+		//std::cout<<"写入Pang"<<std::endl;
 		*p = m_pPangBuffer;
 
 		m_nWriteFlag = PING;

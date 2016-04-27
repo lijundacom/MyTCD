@@ -43,3 +43,9 @@ void PrintArray(int deepPoint,int  ensemble,signed short int* IQArray){
 		std::cout<<std::endl;
 		}
 }
+void PrintArray(int deepPoint,signed short int* Array){
+	for (int i=0;i<deepPoint;i++){
+				std::cout<<" ("<<Array[i]<<") ";
+		std::cout<<std::endl;
+		}
+}

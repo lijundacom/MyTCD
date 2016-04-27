@@ -15,6 +15,7 @@
 #include <pthread.h>
 #include <vector>
 #include <stdio.h>
+#include <iostream>
 
 namespace Buffer
 {
@@ -149,13 +150,14 @@ int CycleBuffer<T>::GetWritePointer(T ** p)
 	//缓冲区满
 	if(m_nEffitiveNum >= CYCLELENGTH)
 	{
-		//printf("The CycleBuffer is Full!\n");
+		printf("The CycleBuffer is Full!\n");
 		return false;
 	}
 
 	//正常情况
 
 	//返回缓冲区标志
+
 	*p = m_pCycleBuffer[m_nWriteFlag];
 
 	//缓冲区有效数据个数加1
@@ -166,6 +168,7 @@ int CycleBuffer<T>::GetWritePointer(T ** p)
 	//计算下一次写入数据的位置
 	m_nWriteFlag++;
 	m_nWriteFlag = m_nWriteFlag % CYCLELENGTH ;
+	std::cout<<"环形缓冲写入数据位置："<<m_nWriteFlag<<std::endl;
 
 	return true;
 }

@@ -239,7 +239,9 @@ void MultiDeepModeTCDSignalManage::SignalProcess(INT16 *pSrc, INT16 *pDst_v)
 {
 	int nEnsemble = m_nCEnsemble;
 	int nPoints = m_nCPointsNum;
-
+	for(int i=0;i<MAX_BLINE_POINTS;i++){
+		pDst_v[i]=pSrc[i*2];
+	}
 	//壁滤波
 	//ColorWallFilter( m_pfCWFCoef , pSrc , m_fAfterCWF , nEnsemble , nPoints);
 	//ColorWallFilter_Neon(m_pfCWFCoef, pSrc, m_fAfterCWF, nEnsemble, nLines, nPoints);

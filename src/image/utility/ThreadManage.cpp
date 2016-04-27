@@ -216,14 +216,15 @@ bool InitMultiDeepModeTCDThread(void)
 	//ThreadSpace::GetMSignalThread()->Resume();
 
 	//M Image Thread//用于显示线程，从电影缓冲区中取数据显示，可以一次取1条，或者1次取多条，冻结时不取
-//	nRet = pthread_create(&thread_id, NULL, MultiDeepModeTCDImageProcessThread, NULL);
-//	ThreadSpace::GetMultiDeepModeTCDImageThread()->SetThreadID(thread_id);
-//	if (nRet)
-//	{
-//		printf( "ERROR: Failed create MImageProcessThread");
-//		return false;
-//	}
+	nRet = pthread_create(&thread_id, NULL, MultiDeepModeTCDImageProcessThread, NULL);
+	ThreadSpace::GetMultiDeepModeTCDImageThread()->SetThreadID(thread_id);
+	if (nRet)
+	{
+		printf( "ERROR: Failed create MImageProcessThread");
+		return false;
+	}
 	usleep(10000);
+
 	//ThreadSpace::GetMImageThread()->Resume();
 }
 
@@ -275,20 +276,6 @@ bool InitParseThread(void)
 		return false;
 	}
 
-	//usb解析线程
-//	nRet = pthread_create(&thread_id, &attr, usb_thread_parse, NULL);
-//	nRet = pthread_create(&thread_id, 0, usb_thread_parse, NULL);
-	//socket解析线程
-//	nRet = pthread_create(&thread_id, 0, socket_thread_parse, NULL);
-	//file解析线程
-//	nRet = pthread_create(&thread_id, 0, file_thread_parse, NULL);
-//	ThreadSpace::GetParseThread()->SetThreadID(thread_id);
-//	if (nRet)
-//	{
-//		//LOGE( "ERROR: Failed create usb_thread_parse");
-//		printf( "ERROR: Failed create usb_thread_parse");
-//		return false;
-//	}
 
 	pthread_attr_destroy(&attr);
 
