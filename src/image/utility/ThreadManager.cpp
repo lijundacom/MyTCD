@@ -7,24 +7,25 @@
 #include "image/utility/ThreadManage.h"
 //#include "image/utility/DebugPrint.h"
 //#include "image/usb/ParseInterface.h"
-#include "image/signalprocess/MModeSignalManage.h"
-#include "image/signalprocess/PWModeSignalManage.h"
+#include "image/signalprocess/MultiDeepModeTCDSignalManage.h"
+//#include "image/signalprocess/PWModeSignalManage.h"
 //#include "image/buffer/BCineBuffer.h"
 //#include "image/buffer/CCineBuffer.h"
-#include "image/buffer/MCineBuffer.h"
-#include "image/buffer/PWCineBuffer.h"
+//#include "image/buffer/MCineBuffer.h"
+//#include "image/buffer/PWCineBuffer.h"
 #include "image/buffer/CycleBuffer.h"
 #include "image/utility/SynSemaphore.h"
 //#include "image/utility/ImageDef.h"
-#include "image/mode/MModeThread.h"
+#include "image/mode/MultiDeepModeTCDThread.h"
+
 //#include "image/mode/BModeThread.h"
 //#include "image/mode/CModeThread.h"
-#include "image/mode/PWModeThread.h"
+//#include "image/mode/PWModeThread.h"
 namespace ThreadSpace
 {
 
 Thread::Thread() :
-		m_bPauseStatus(THREAD_STATUS_PAUSED)
+		m_bPauseStatus(THREAD_STATUS_RUNNING)
 {
 	pthread_mutex_init(&m_mutexPause, NULL);
 	pthread_cond_init(&m_condPause, NULL);
@@ -162,25 +163,25 @@ Thread * GetReadThread(void)
 }
 
 
-Thread * GetMSignalThread(void)
+Thread * GetMultiDeepModeTCDSignalThread(void)
 {
 	return &g_MSignalThread;
 }
 
-Thread * GetMImageThread(void)
+Thread * GetMultiDeepModeTCDImageThread(void)
 {
 	return &g_MImageThread;
 }
 
-Thread * GetPWSignalThread(void)
-{
-	return &g_PWSignalThread;
-}
-
-Thread * GetPWImageThread(void)
-{
-	return &g_PWImageThread;
-}
+//Thread * GetPWSignalThread(void)
+//{
+//	return &g_PWSignalThread;
+//}
+//
+//Thread * GetPWImageThread(void)
+//{
+//	return &g_PWImageThread;
+//}
 
 // ------------------------------------------------------------
 // Description	:初始化M模式的线程
@@ -189,12 +190,12 @@ Thread * GetPWImageThread(void)
 //	false- 初始化出错
 //	true - 正常初始化
 // ------------------------------------------------------------
-bool InitMModeThread(void)
+bool InitMultiDeepModeTCDThread(void)
 {
-	//Init The M CineBuffer
-	MCineBuffer::InitMCineBuffer();
-	MCineBuffer::SetAllMaxSize(800);
-	MCineBuffer::SetActiveIndex(0);
+	//Init The M CineBuffer,处理模块和显示模块的buffer
+//	MCineBuffer::InitMCineBuffer();
+//	MCineBuffer::SetAllMaxSize(800);
+//	MCineBuffer::SetActiveIndex(0);
 
 	pthread_t thread_id;
 	int nRet = 0;
@@ -207,24 +208,24 @@ bool InitMModeThread(void)
 	//		return false;
 	//	}
 
-	//M Signal Thread
-	nRet = pthread_create(&thread_id, NULL, MSignalProcessThread, NULL);
-	ThreadSpace::GetMSignalThread()->SetThreadID(thread_id);
+	//M Signal Thread信号处理线程，包括滤波和自相关
+	nRet = pthread_create(&thread_id, NULL, MultiDeepModeTCDSignalProcessThread, NULL);
+	ThreadSpace::GetMultiDeepModeTCDSignalThread()->SetThreadID(thread_id);
 	if (nRet)
 	{
-		printf( "ERROR: Failed create MSignalProcessThread");
+		printf( "ERROR: Failed create MSignalProcessThread\n");
 		return false;
 	}
 	//ThreadSpace::GetMSignalThread()->Resume();
 
-	//M Image Thread
-	nRet = pthread_create(&thread_id, NULL, MImageProcessThread, NULL);
-	ThreadSpace::GetMImageThread()->SetThreadID(thread_id);
-	if (nRet)
-	{
-		printf( "ERROR: Failed create MImageProcessThread");
-		return false;
-	}
+	//M Image Thread//用于显示线程，从电影缓冲区中取数据显示，可以一次取1条，或者1次取多条，冻结时不取
+//	nRet = pthread_create(&thread_id, NULL, MultiDeepModeTCDImageProcessThread, NULL);
+//	ThreadSpace::GetMultiDeepModeTCDImageThread()->SetThreadID(thread_id);
+//	if (nRet)
+//	{
+//		printf( "ERROR: Failed create MImageProcessThread");
+//		return false;
+//	}
 	usleep(10000);
 	//ThreadSpace::GetMImageThread()->Resume();
 }
@@ -241,7 +242,7 @@ bool InitMModeThread(void)
 bool InitParseThread(void)
 {
 	//LOGI( "Gui Usb ParseThread is start! ");
-	printf( "Gui Usb ParseThread is start! ");
+	printf( "Gui Usb ParseThread is start!\n ");
 
 	pthread_t thread_id;
 	int nRet = 0;
@@ -249,11 +250,11 @@ bool InitParseThread(void)
 	//初始化USB接口
 	int ret;
 	unsigned char tmpbuf[2048];
-	ret = Start_USB_Device();
+	//ret = Start_USB_Device();
 	//LOGI( "Start The usb devices,the result is %d", ret);
-	printf( "Start The usb devices,the result is %d", ret);
-	DownFreezeCommand();
-	ClearResidualEchoData(tmpbuf, 2048);
+	//printf( "Start The usb devices,the result is %d", ret);
+	//DownFreezeCommand();
+	//ClearResidualEchoData(tmpbuf, 2048);
 
 //设置线程优先级
 	pthread_attr_t attr;	//线程属性
@@ -265,25 +266,32 @@ bool InitParseThread(void)
 
 	//usb读取解析线程
 //	nRet = pthread_create(&thread_id, &attr, usb_thread_read, NULL);
-	nRet = pthread_create(&thread_id, 0, usb_thread_read, NULL);
+//	nRet = pthread_create(&thread_id, 0, usb_thread_read, NULL);
+	//从socket读取数据并解析数据线程
+//	nRet = pthread_create(&thread_id, 0, socket_thread_read, NULL);
+	nRet = pthread_create(&thread_id, 0, MultiDeepModeTCDGetDataThread, NULL);
 	ThreadSpace::GetReadThread()->SetThreadID(thread_id);
 	if (nRet)
 	{
 		//LOGE( "ERROR: Failed create usb_thread_read");
-		printf( "ERROR: Failed create usb_thread_read");
+		printf( "ERROR: Failed create usb_thread_read\n");
 		return false;
 	}
 
 	//usb解析线程
 //	nRet = pthread_create(&thread_id, &attr, usb_thread_parse, NULL);
-	nRet = pthread_create(&thread_id, 0, usb_thread_parse, NULL);
-	ThreadSpace::GetParseThread()->SetThreadID(thread_id);
-	if (nRet)
-	{
-		//LOGE( "ERROR: Failed create usb_thread_parse");
-		printf( "ERROR: Failed create usb_thread_parse");
-		return false;
-	}
+//	nRet = pthread_create(&thread_id, 0, usb_thread_parse, NULL);
+	//socket解析线程
+//	nRet = pthread_create(&thread_id, 0, socket_thread_parse, NULL);
+	//file解析线程
+//	nRet = pthread_create(&thread_id, 0, file_thread_parse, NULL);
+//	ThreadSpace::GetParseThread()->SetThreadID(thread_id);
+//	if (nRet)
+//	{
+//		//LOGE( "ERROR: Failed create usb_thread_parse");
+//		printf( "ERROR: Failed create usb_thread_parse");
+//		return false;
+//	}
 
 	pthread_attr_destroy(&attr);
 
@@ -372,7 +380,7 @@ bool InitPWModeThread(void)
 bool InitALLThreads()
 {
 	//LOG( "GUI", "Init All Threads");
-	printf( "GUI", "Init All Threads");
+	printf( "GUI", "Init All Threads\n");
 
 	//前端解析数据流线程
 	InitParseThread();
@@ -381,7 +389,7 @@ bool InitALLThreads()
 	//InitBModeThread();
 
 	//M 数据流处理线程
-	InitMModeThread();
+	InitMultiDeepModeTCDThread();
 
 	//PW 数据流处理线程
 	//InitPWModeThread();

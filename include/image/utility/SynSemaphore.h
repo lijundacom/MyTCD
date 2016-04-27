@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <signal.h>
+#include <stdio.h>
 
 namespace SynSem
 {
@@ -53,13 +54,13 @@ struct ParseAndSignalSem
 	//B 复合成像线程与信号处理之间的信号量
 	//PCSemphore m_Sem_BMode_CompSignal;
 
-	//MModeTCD
-	PCSemphore m_Sem_MMode;
+	//MultiDeepModeTCD
+	PCSemphore m_Sem_MultiDeepModeTCD;
 	//C
 	//PCSemphore m_Sem_CMode;
 
 	//PWModeTCD
-	PCSemphore m_Sem_PWMode;
+	//PCSemphore m_Sem_PWMode;
 
 
 };
@@ -75,9 +76,9 @@ struct ImageAndDispSem
 	//C
 	//PCSemphore m_Sem_CMode;
 	//MModeTCD
-	PCSemphore m_Sem_MMode;
+	PCSemphore m_Sem_MultiDeepModeTCD;
 	//PW
-	PCSemphore m_Sem_PWMode;
+	//PCSemphore m_Sem_PWMode;
 
 };
 //用于图像处理模块与刷新显示模块的信号量

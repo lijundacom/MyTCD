@@ -20,7 +20,7 @@ namespace Buffer
 {
 
 //循环缓冲区的长度
-const int CYCLELENGTH (3);
+const int CYCLELENGTH (20);
 
 template<class T>
 class CycleBuffer

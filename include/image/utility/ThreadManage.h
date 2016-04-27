@@ -8,7 +8,7 @@
 #ifndef THREADMANAGE_H_
 #define THREADMANAGE_H_
 #include <pthread.h>
-
+#include "image/mode/MultiDeepModeTCDThread.h"
 #define THREAD_STATUS_RUNNING (true)
 #define THREAD_STATUS_PAUSED (false)
 
@@ -64,7 +64,8 @@ public:
 	// Parameter	:void
 	// Return Value	:thread_t-pthread_t类型的线程ID
 	// ------------------------------------------------------------
-	pthread_t GetThreadID() const;
+	pthread_t GetThreadID() const;// const的函数不能对其数据成员进行修改操作。
+	// const的对象，不能引用非const的成员函数。
 
 	// ------------------------------------------------------------
 	// Description	:设置线程的ID
@@ -98,7 +99,7 @@ bool InitALLThreads(void);
 //	false-线程操作出错
 //	true-线程操作成功
 // ------------------------------------------------------------
-bool PauseMModeThread();
+bool PauseMultiDeepModeTCDThread();
 
 // ------------------------------------------------------------
 // Description	:恢复M模式的线程
@@ -107,7 +108,7 @@ bool PauseMModeThread();
 //	false-线程操作出错
 //	true-线程操作成功
 // ------------------------------------------------------------
-bool ResumMModeThread();
+bool ResumMultiDeepModeTCDThread();
 
 // ------------------------------------------------------------
 // Description	:模式切换
@@ -122,13 +123,13 @@ bool ResumMModeThread();
 Thread * GetReadThread(void);
 Thread * GetParseThread(void);
 
-Thread * GetMSignalThread(void);
+Thread * GetMultiDeepModeTCDSignalThread(void);
 
-Thread * GetMImageThread(void);
+Thread * GetMultiDeepModeTCDImageThread(void);
 
-Thread * GetPWSignalThread(void);
+//Thread * GetPWSignalThread(void);
 
-Thread * GetPWImageThread(void);
+//Thread * GetPWImageThread(void);
 
 //Thread * GetCSignalThread(void);
 

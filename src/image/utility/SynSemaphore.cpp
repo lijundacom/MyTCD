@@ -55,7 +55,7 @@ PCSemphore::PCSemphore()
 {
 	// 初始化同步信号量
 	int nRntFull = sem_init(&m_semFull, 0, 0); //产品队列缓冲同步
-	int nRntEmpty = sem_init(&m_semEmpty, 0, BUFFERLENGTH); //线程运行同步
+	int nRntEmpty = sem_init(&m_semEmpty, 0, BUFFERLENGTH); //线程运行同步,BUFFERLENGTH为信号量初始值
 	if (nRntFull || nRntEmpty)
 	{
 		printf("信号量初始化失败！\n");

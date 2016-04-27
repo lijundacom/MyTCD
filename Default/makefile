@@ -8,7 +8,9 @@ RM := rm
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/subdir.mk
+-include src/image/utility/subdir.mk
+-include src/image/signalprocess/subdir.mk
+-include src/image/mode/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -38,19 +40,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: 
+all: MyTCD
 
 # Tool invocations
-: $(OBJS) $(USER_OBJS)
+MyTCD: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o  $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "MyTCD" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) 
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) MyTCD
 	-@echo ' '
 
 .PHONY: all clean dependents

@@ -1,0 +1,1 @@
+g++  -o "MyTCD"  ./src/image/utility/ReadFile.o ./src/image/utility/SynSemaphore.o ./src/image/utility/ThreadManager.o ./src/image/utility/TimerTest.o  ./src/image/signalprocess/MultiDeepModeTCDSignalManage.o ./src/image/signalprocess/MultiDeepModeTCDSignalProcess.o  ./main.o   -lpthread
