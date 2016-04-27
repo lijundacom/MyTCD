@@ -5,7 +5,7 @@
  *      Author: ljd
  */
 #include "image/utility/ThreadManage.h"
-
+#include "stdio.h"
 int main(){
 	ThreadSpace::InitALLThreads();
 	getchar();

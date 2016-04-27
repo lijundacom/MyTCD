@@ -143,14 +143,11 @@ void Thread::SuspendCheck(void)
 // ------------------------------------------------------------
 static Thread g_ReadThread;	//读取数据线程
 static Thread g_ParseThread;	//数据解析线程
-
+static Thread g_MultiDeepModeTCDSignalThread;
+static Thread g_MultiDeepModeTCDImageThread;
 //static Thread g_BSignalThread;	//B 模式信号处理线程
 //static Thread g_BImageThread; 	//B 图像处理线程
-static Thread g_MSignalThread;	//M 模式信号处理线程
-static Thread g_MImageThread; 	//M 图像处理线程
 
-static Thread g_PWSignalThread;	//PW 模式信号处理线程
-static Thread g_PWImageThread;	//PW 模式图像处理线程
 
 Thread * GetParseThread(void)
 {
@@ -165,12 +162,12 @@ Thread * GetReadThread(void)
 
 Thread * GetMultiDeepModeTCDSignalThread(void)
 {
-	return &g_MSignalThread;
+	return &g_MultiDeepModeTCDSignalThread;
 }
 
 Thread * GetMultiDeepModeTCDImageThread(void)
 {
-	return &g_MImageThread;
+	return &g_MultiDeepModeTCDImageThread;
 }
 
 //Thread * GetPWSignalThread(void)

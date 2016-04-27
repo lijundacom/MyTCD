@@ -6,19 +6,19 @@
 CPP_SRCS += \
 ../src/image/utility/ReadFile.cpp \
 ../src/image/utility/SynSemaphore.cpp \
-../src/image/utility/ThreadManager.cpp \
+../src/image/utility/ThreadManage.cpp \
 ../src/image/utility/TimerTest.cpp 
 
 OBJS += \
 ./src/image/utility/ReadFile.o \
 ./src/image/utility/SynSemaphore.o \
-./src/image/utility/ThreadManager.o \
+./src/image/utility/ThreadManage.o \
 ./src/image/utility/TimerTest.o 
 
 CPP_DEPS += \
 ./src/image/utility/ReadFile.d \
 ./src/image/utility/SynSemaphore.d \
-./src/image/utility/ThreadManager.d \
+./src/image/utility/ThreadManage.d \
 ./src/image/utility/TimerTest.d 
 
 
