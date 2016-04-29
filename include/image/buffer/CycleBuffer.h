@@ -168,7 +168,7 @@ int CycleBuffer<T>::GetWritePointer(T ** p)
 	//计算下一次写入数据的位置
 	m_nWriteFlag++;
 	m_nWriteFlag = m_nWriteFlag % CYCLELENGTH ;
-	std::cout<<"环形缓冲写入数据位置："<<m_nWriteFlag<<std::endl;
+	//std::cout<<"环形缓冲写入数据位置："<<m_nWriteFlag<<std::endl;
 
 	return true;
 }

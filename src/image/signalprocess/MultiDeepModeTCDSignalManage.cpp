@@ -27,125 +27,20 @@ namespace SignalProcess
 
 MultiDeepModeTCDSignalManage::MultiDeepModeTCDSignalManage()
 {
-//	static float fCWFCoef [ 16 * 16 ] = { 0.106060606060658 , - 0.242424242424264 , 0.0606060606060222 , 0.121212121212100 , 0.0454545454545552 , - 0.0606060606060281 ,
-//			- 0.0909090909090633 , 0.0606060606060321 , - 0.242424242424264 , 0.625541125541133 , - 0.329004329004313 , - 0.181818181818171 , - 0.00865800865800970 ,
-//			0.114718614718604 , 0.112554112554102 , - 0.0909090909090846 , 0.0606060606060221 , - 0.329004329004311 , 0.582251082251116 , - 0.311688311688286 ,
-//			- 0.116883116883110 , 0.0606060606060535 , 0.114718614718615 , - 0.0606060606060179 , 0.121212121212100 , - 0.181818181818170 , - 0.311688311688291 ,
-//			0.686147186147201 , - 0.233766233766232 , - 0.116883116883125 , - 0.00865800865801525 , 0.0454545454545618 , 0.0454545454545559 , - 0.00865800865800592 ,
-//			- 0.116883116883116 , - 0.233766233766231 , 0.686147186147193 , - 0.311688311688302 , - 0.181818181818174 , 0.121212121212123 , - 0.0606060606060300 ,
-//			0.114718614718607 , 0.0606060606060482 , - 0.116883116883113 , - 0.311688311688280 , 0.582251082251141 , - 0.329004329004253 , 0.0606060606061298 ,
-//			- 0.0909090909090590 , 0.112554112554110 , 0.114718614718604 , - 0.00865800865800992 , - 0.181818181818166 , - 0.329004329004298 , 0.625541125541161 ,
-//			- 0.242424242424221 , 0.0606060606060272 , - 0.0909090909090899 , - 0.0606060606060539 , 0.0454545454545396 , 0.121212121212095 , 0.0606060606060161 ,
-//			- 0.242424242424292 , 0.106060606060574 };
+	m_nMDEnsemble = MAX_MD_ENSEMBLE;		//回归滤波器维数/自相关线数
 
-	static float fCoef[9] = { 1 / 16.0, 2 / 16.0, 1 / 16.0, 2 / 16.0, 4 / 16.0, 2 / 16.0, 1 / 16.0, 2 / 16.0, 1 / 16.0 };
-	//平滑系数，这里暂时使用固定的系数。开立给定的平滑系数计算方式以后再考虑。
-	m_pSmoothWeightCoeff = fCoef;
-	//the color wall filter index
-	m_nCWFIndex = 3;
-
-
-
-	m_nCEnsemble = MAXC_ENSEMBLE;		//线阵、凸阵-12 //相控阵-8
-	m_nCLD = 1;
-
-	//彩色框垂直方向的起始点
-//	m_nColorFrameStartPoint = 30;		//凸阵
-
-	// point amount of one line
-	m_nCPointsNum = 212 / 2;
-	// line amount of one frame
-//	m_nCLineNum = 47;
-
-	//Color的抽取倍率
-	m_fCExtraMultiple = 2;
-	//Persist value
-	m_nPersist = 1;
-	//Smooth parameter
-	m_nSmoothWeightCoeffRow = 3;
-	m_nSmoothWeightCoeffCol = 3;
-
-	//判断帧相关是否有缓存数据
-	m_bIsFirstFrame = true;
-
-//	SmoothWeightCoeff rowIndex = 4
-//	SmoothWeightCoeff colIndex = 2
-	m_nNoiseOffset = 50;
-	m_nCSmo = 43;
-	m_nCVarianceThreshold = 129;
-//	m_dCovarianceCoef = 3.501409;
-	m_nAGain = 50;
-	m_nNoiseSlope = 50;
-	m_nContrast = 41;
-	m_nDYN = 50;
-	m_nPrioSlope = 158;
-
-	m_nVelocityThreshold = 30;
-//	m_nCTissueThreshold = 52;
-	m_nCTissueThreshold = 80;
-	m_nNoiseThreshold = 60000;	//凸阵15000，
-	m_nCPMidleThreshold = 16327;
-	m_nVarLowThreshold = 64059;
-
-	m_nMorphologyFlag = 1;
-	//用于能量计算的增益补偿，未测试过
-//	m_nStartPointOfGain = 10;
-//	for (int i = 0; i < 480; i++)
-//	{
-//		m_fDigitalGain[i] = 1;
-//	}
-	//数据增益加上之后跟其他参数没有配合好，导致彩色图像效果很差，所以暂时不用
-//	DigitalGain();
-
-	//壁滤波系数
-	//m_pfCWFCoef = (float*) malloc(m_nCEnsemble * m_nCEnsemble * sizeof(float));
-	//LoadWallCoef(m_pfCWFCoef, m_nCEnsemble,m_nCWFIndex);
-
-//	//计算能量的动态范围变换映射表参数
-//	m_nCPowerDynamicRange = 80;
-//	m_nPowerControlPoint = MAX_POWER_VALUE * 40 / 100;
-//	CalcDRCurve(m_nCPowerDynamicRange, m_nPowerControlPoint);
-
-
-
-
+	m_nMDPointsNum = DEEP_POINTS;	//每条线深度方向的点数
+	m_pfMDWFCoef = (float*) malloc(16 * 16 * sizeof(float));
+	LoadWallCoef(m_pfMDWFCoef, m_nMDEnsemble,m_nMDWFIndex);
 }
 
 MultiDeepModeTCDSignalManage::~MultiDeepModeTCDSignalManage()
 {
-	if (NULL != m_pfCWFCoef)
+	if (NULL != m_pfMDWFCoef)
 	{
-		free(m_pfCWFCoef);
+		free(m_pfMDWFCoef);
 	}
 }
-
-// ------------------------------------------------------------
-// Description	:速度帪相关处理函数,处理完成后将相关结果拷贝到输入数据指针,当不存在缓存时直接拷贝
-//				根据新值和旧值各种条件依次处理
-//				1.数据反号; 2.新值小于旧值; 3.正常加权
-// Parameter	:
-//		pNewFrame-输入的新的数据帧
-//		pCache-前一帧数据的缓冲
-//		nLineAmount-线数
-//		nPointAmount-点数
-//		VFPCoef-帧相关系数
-// Retrun Value	:void
-// ------------------------------------------------------------
-//void MultiDeepModeTCDSignalManage::VelocityCorrelation(INT8 *pNewFrame, INT8 *pCache, int nPointAmount,
-//		int nVFPCoef)
-//{
-//	if (true == m_bIsFirstFrame)
-//	{
-//		//当前数据为第一帧，没有缓存，直接拷贝数据
-//		memcpy(pCache, pNewFrame, sizeof(char)  * nPointAmount);
-//		m_bIsFirstFrame = false;
-//	} else
-//	{
-//		VelocityCorrelationOneFrame(pNewFrame, pCache, nPointAmount, nVFPCoef);
-//	}
-//}
-
-
 
 // ------------------------------------------------------------
 // Description	:设置C模式的参数
@@ -155,10 +50,8 @@ MultiDeepModeTCDSignalManage::~MultiDeepModeTCDSignalManage()
 // ------------------------------------------------------------
 void MultiDeepModeTCDSignalManage::SetMultiDeepModeTCDParam()
 {
-	//判断帧相关是否有缓存数据
-	m_bIsFirstFrame = true;
 	//壁滤波系数
-	LoadWallCoef(m_pfCWFCoef, m_nCEnsemble,m_nCWFIndex);
+	LoadWallCoef(m_pfMDWFCoef, m_nMDEnsemble,m_nMDWFIndex);
 	//设置各种参数，实际过程中应从xml中读取
 	//上层使用android写xml配置文件
 	//下层使用c++直接读取
@@ -185,21 +78,20 @@ void MultiDeepModeTCDSignalManage::GetMultiDeepModeTCDParam()
 //		0-加载壁滤波器系数成功
 //		-1-加载壁滤波系数失败，找不到文件
 // ------------------------------------------------------------
-int MultiDeepModeTCDSignalManage::LoadWallCoef(float* fpCoef, int nEnsemble, int nCWFIndex)
+int MultiDeepModeTCDSignalManage::LoadWallCoef(float* fpCoef, int nEnsemble, int nMDWFIndex)
 {
 	//这里使用回归滤波器
 
 	//check the nCWFIndex
-	if((3>nCWFIndex )||(6<nCWFIndex ))
+	if((3>nMDWFIndex )||(6<nMDWFIndex ))
 	{
-		nCWFIndex = 3;
+		nMDWFIndex = 3;
 	}
 
 	//set the file path
 	FILE* fp;
 	char cPath[50];
-	sprintf(cPath, "/data/downdata/Color_WFilter/CWF_D%dK%d", nCWFIndex, nEnsemble);
-//	sprintf(cPath, "/data/downdata/Color_WFilter/WFcoef%d.txt", nEnsemble);
+	sprintf(cPath, "/home/ljd/data/WallFilter/CWF_D%dK%d", nMDWFIndex, nEnsemble);
 
 	//open the file
 	fp = fopen(cPath, "rb");
@@ -235,19 +127,23 @@ int MultiDeepModeTCDSignalManage::LoadWallCoef(float* fpCoef, int nEnsemble, int
 //	pDst_v-输出的速度矩阵指针
 // Retrun Value	:void
 // ------------------------------------------------------------
-void MultiDeepModeTCDSignalManage::SignalProcess(INT16 *pSrc, INT16 *pDst_v)
+void MultiDeepModeTCDSignalManage::SignalProcess(INT16 *pSrc, float *pDst_v)
 {
-	int nEnsemble = m_nCEnsemble;
-	int nPoints = m_nCPointsNum;
-	for(int i=0;i<MAX_BLINE_POINTS;i++){
-		pDst_v[i]=pSrc[i*2];
-	}
-	//壁滤波
-	//ColorWallFilter( m_pfCWFCoef , pSrc , m_fAfterCWF , nEnsemble , nPoints);
-	//ColorWallFilter_Neon(m_pfCWFCoef, pSrc, m_fAfterCWF, nEnsemble, nLines, nPoints);
+	int nEnsemble = m_nMDEnsemble;
+	int nPoints = m_nMDPointsNum;
 
-	//自相关
-	//CAutoCorrelation();
+	//壁滤波（回归滤波器系数/原始数据nPoints*nEnsemble/滤波后数据nPoints*nEnsemble/滤波阶数/每个深度的点数）
+	MultiDeepModeTCDWallFilter( m_pfMDWFCoef, pSrc ,m_fAfterCWF ,nEnsemble , nPoints);
+	//ColorWallFilter_Neon(m_pfCWFCoef, pSrc, m_fAfterCWF, nEnsemble, nLines, nPoints);
+	//printf("m_fAfterCWF\n");
+	//PrintArray(nPoints,nEnsemble,m_fAfterCWF);
+	//自相关（滤波后的数据/输出的速度数据/滤波阶数/每个深度的点数）
+	MultiDeepModeTCDAutoCorrelation(m_fAfterCWF, m_nVelocityAfterAC, nEnsemble,nPoints);
+	for(int i=0;i<nPoints;i++){
+		pDst_v[i]=m_nVelocityAfterAC[i];
+	}
+	//printf("m_nVelocityAfterAC\n");
+	//PrintArray(nPoints,m_nVelocityAfterAC);
 	//CAutoCorrelation_Neon(m_fAfterCWF, m_nVelocityAfterAC, m_unPowerAfterAC, m_unVarianceAfterAC, nEnsemble, nLines, nPoints, m_nCovarianceCoef, m_fDigitalGain, m_nStartPointOfGain);
 
 //	//速度阀值
@@ -267,6 +163,8 @@ void MultiDeepModeTCDSignalManage::SignalProcess(INT16 *pSrc, INT16 *pDst_v)
 //		VelocityThreshold(pDst_v, nPoints, m_nVelocityThreshold);
 //	}
 
+
+	//pDst_v与m_nVelocityOut转换的函数
 }
 
 

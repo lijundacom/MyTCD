@@ -7,33 +7,34 @@
 
 #ifndef MULTIDEEPMODETCDSIGNALPROCESS_H_
 #define MULTIDEEPMODETCDSIGNALPROCESS_H_
+#include "image/utility/ImageDef.h"
 #include "image/GlobalDefine.h"
 #include "image/utility/TimerTest.h"
 #include "image/mode/MultiDeepModeTCDThread.h"
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <sys/time.h>
+extern int fprf;//采样频率
+extern float cosTh;//cos(45),45为探头与血流角度
+extern int transferFrequence;//探头频率
 //#include "arm_neon.h"
 // ------------------------------------------------------------
 // Description	:color数据自相关计算
 // Parameter	:
-//		float *dstCWF         ---自相关计算输入数据
-//		INT8 *out_v         ---输出速度份量
-//		uint8_t *out_c        ---输出方差份量
-//		uint16_t *out_p       ---输出能量份量
-//		int16_t linesNum      ---自相关计算输入数据行数
-//		int16_t pointsNum     ---自相关计算输入数据点数
-//		uint32_t c_PRE_lt     ---自相关低阀值
-//		uint32_t c_PRE_ht     ---自相关高阀值
+//		m_fAfterCWF:壁滤波之后的矩阵[nPoints*nEnsemble]
+//		m_nVelocityAfterAC:自相关之后的速度矩阵[nPoints*1]
+//		nEnsemble:自相关阶数
+//		nPoints:每个深度的点数
 // Retrun Value	:
 //		0-计算正确
 //		-1-输入数据指针为空,有错误
 // ------------------------------------------------------------
-int CAutoCorrelation();
-
+int MultiDeepModeTCDAutoCorrelation(float* m_fAfterCWF,float* m_nVelocityAfterAC,int nEnsemble,int nPoints);
+//int MultiDeepModeTCDAutoCorrelation(float* m_fAfterCWF,double* m_nVelocityAfterAC,int nEnsemble,int nPoints);
 // ------------------------------------------------------------
 // Description	:壁滤波
 // Parameter	:
@@ -47,9 +48,9 @@ int CAutoCorrelation();
 //		0-计算正确
 //		-1-输入数据指针为空,有错误
 // ------------------------------------------------------------
-int ColorWallFilter(const float *pCWFCoef, int *pSrc, float *pDest, unsigned int nEnsemble,
-					unsigned int nPointAmount);
-int ColorWallFilter_Neon(const float *pCWFCoef, int *pSrc, float *pDest, unsigned int nEnsemble,
+int MultiDeepModeTCDWallFilter(const float *pCWFCoef, signed short int *pSrc, float *pDest, int nEnsemble,
+					int nPointAmount);
+int MultiDeepModeTCDWallFilter_Neon(const float *pCWFCoef, int *pSrc, float *pDest, unsigned int nEnsemble,
 		unsigned int nPointAmount);
 
 // ------------------------------------------------------------

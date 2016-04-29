@@ -43,9 +43,24 @@ void PrintArray(int deepPoint,int  ensemble,signed short int* IQArray){
 		std::cout<<std::endl;
 		}
 }
+void PrintArray(int deepPoint,int  ensemble,float* IQArray){
+	for (int i=0;i<deepPoint;i++){
+
+			for (int j = 0;j<ensemble;j++){
+				std::cout<<" ("<<IQArray[j*deepPoint*2+i*2]<<","<<IQArray[j*deepPoint*2+i*2+1]<<") ";
+			}
+		std::cout<<std::endl;
+		}
+}
 void PrintArray(int deepPoint,signed short int* Array){
 	for (int i=0;i<deepPoint;i++){
 				std::cout<<" ("<<Array[i]<<") ";
 		std::cout<<std::endl;
 		}
+}
+void PrintArray(int deepPoint,float* velocityArray){
+	for (int i=0;i<deepPoint;i++){
+			std::cout<<" "<<velocityArray[i]<<" ";
+		}
+	std::cout<<std::endl;
 }

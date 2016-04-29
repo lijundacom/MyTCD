@@ -14,154 +14,60 @@
 namespace SignalProcess
 {
 
-//// 形态学处理方法
-//enum _MorphologyType
-//{
-//	MORPHOLOGY_START = 0,
-//	MORPHOLOGY_DILATION,		// 膨胀
-//	MORPHOLOGY_EROSION,		// 腐蚀
-//	MORPHOLOGY_OPENING,		// 形态学开
-//	MORPHOLOGY_CLOSING,		// 形态学闭
-//	MORPHOLOGY_END
-//};
-
-//static const int MAXC_ENSEMBLE = 16;
-//static const int MAXBLINE_LEN = 480;
-static const int MAXBLINE_NUM = 255;
-
-//能量最大值
-#define MAX_POWER_VALUE		((1<<16)-1)
 
 class MultiDeepModeTCDSignalManage
 {
 private:
 	// The Data Before Color Wall Filter
-	float m_fBeforCWF[MAXC_ENSEMBLE * MAXBLINE_NUM * 2];
+	float m_fBeforCWF[MAX_MD_ENSEMBLE * DEEP_POINTS * 2];
 	// The Data After Color Wall Filter
-	float m_fAfterCWF[MAXC_ENSEMBLE * MAXBLINE_NUM * 2];
+	float m_fAfterCWF[MAX_MD_ENSEMBLE * DEEP_POINTS * 2];
 
 	//Velocity After AutoCorrelation
-	INT8 m_nVelocityAfterAC[MAXBLINE_NUM];
-	//Power After AutoCorrelation
-	//UINT16 m_unPowerAfterAC[MAXBLINE_NUM * MAXBLINE_LEN];
-	//Variance(方差) After AutoCorrelation
-	//UINT8 m_unVarianceAfterAC[MAXBLINE_NUM * MAXBLINE_LEN];
+	float m_nVelocityAfterAC[DEEP_POINTS];
+
 
 	//Velocity Out Data
-	INT8 m_nVelocityOut[MAXBLINE_NUM ];
-	//Power Out Data
-	//UINT8 m_unPowerOut[MAXBLINE_NUM ];
-	//Variance Out Data
-	//UINT8 m_unVarianceOut[MAXBLINE_NUM];
+	INT8 m_nVelocityOut[DEEP_POINTS ];
+
 
 	//Velocity TMP Buffer
-	INT8 m_nVAfterSmooth[MAXBLINE_NUM ];
+	INT8 m_nVAfterSmooth[DEEP_POINTS ];
 
 	//壁滤波系数
-	float* m_pfCWFCoef;
-	//平滑系数
-	float* m_pSmoothWeightCoeff;
-
-	//彩色框垂直方向的起始点
-	//int m_nColorFrameStartPoint;
-	//彩色框垂直方向的终止点
-	//int m_nColorFrameEndPoint;
-
+	float* m_pfMDWFCoef;
 
 	//每一个点的数据采样个数，从4到16条
-	int m_nCEnsemble;
-	// 线密度
-	int m_nCLD;
-	//彩色模式的终止线号
-	//int m_nCStartLineNum;
-	//彩色模式的终止线号
-	//int m_nCEndLineNum;
+	int m_nMDEnsemble;
+
 
 	// point amount of one line
-	int m_nCPointsNum;
-	// line amount of one frame
-	//int m_nCLineNum;
+	int m_nMDPointsNum;
+
 	// Velocity threshold
 	int m_nVelocityThreshold;
-	//Persist value
-	int m_nPersist;
-	//Smooth parameter
-	int m_nSmoothWeightCoeffRow;
-	int m_nSmoothWeightCoeffCol;
 	//the color wall filter index
-	int m_nCWFIndex;
+	int m_nMDWFIndex;
 
 
 	//Color的抽取倍率，暂时认为这个参数代表Color线的需要放大的比例倍数
 	float m_fCExtraMultiple;
 
-	//Add 2013-11-29
-	//壁滤波前的能量
-	//float m_fPowerBeforeCWF[MAXBLINE_NUM * MAXBLINE_LEN];
-	//Power After PowerMeanSmooth
-	//UINT16 m_unPowerAfterSmooth[MAXBLINE_NUM * MAXBLINE_LEN];
-	//能量帧相关的缓存
-	//UINT16 m_nPPersistCache[MAXBLINE_NUM * MAXBLINE_LEN];
+
 	//速度帧相关的缓存
-	INT8 m_nVPersistCache[MAXBLINE_NUM];
-	// CFM和DPI分开处理前的中值滤波器的速度buffer
-	//INT8 m_MFV[3][255 * MAXBLINE_LEN];
-	// CFM和DPI分开处理前的中值滤波器的能量buffer
-	//UINT16 m_MFP[3][255 * MAXBLINE_LEN];
+	INT8 m_nVPersistCache[1];
+
 	// 速度模式处理环节的专用buffer
 	INT8 m_VMedian[3][255 * MAXBLINE_LEN];
 
-	//组织阀值
-	int m_nCTissueThreshold;
-	//噪声阀值
-	int m_nNoiseThreshold;
 
-	//能量中值滤波阀值，暂时没有使用
-	//在阀值处理Threshold中作为中值滤波的判断条件if (0 == m_MFP[MF1][i*MAXBLINE_LEN+j]	&& 0 == m_MFP[MF3][i*MAXBLINE_LEN+j]&& m_MFP[MF2][i*MAXBLINE_LEN+j]> m_nCPMidleThreshold)
-	int m_nCPMidleThreshold;
-	//m_nMorphologyFlag作为形态学处理的开关，{0:没有形态学处理; 1:开运算(Dilated); 2:腐蚀(Eroded)}
-	//m_nMorphologyFlag为非0，则进行形态学处理，进行形态学处理后又增加了一次速度阀值处理
-	//(m_nMorphologyFlag % 2) == 0 进行Eroded腐蚀处理， (m_nMorphologyFlag % 2) ！= 0时进行Dilated（开运算）
-	int m_nMorphologyFlag;
-	//在阀值处理Threshold中作为方差的阀值判断条件if( aPower[LineOffset + j] < m_nNoiseThreshold|| aVariance[LineOffset + j] > m_nVarLowThreshold)
-	int m_nVarLowThreshold;
-
-	//用于计算能量矩阵的动态范围映射表
-	//能量矩阵的动态范围，值越大范围越宽，以dB为单位
-	//int m_nCPowerDynamicRange;
-	//能量矩阵的动态范围中值点
-	//int m_nPowerControlPoint;
 
 	//用于帧相关判断是否有缓存数据
 	bool m_bIsFirstFrame;
 	//方差系数
 	//double m_dCovarianceCoef;
 
-	//数值增益，用于计算能量补偿
-	//float m_fDigitalGain[MAXBLINE_LEN];
-	//int m_nStartPointOfGain;
-	//平滑效果
-	int m_nCSmo;
-	int m_nAGain;
-	int m_nNoiseSlope;
-	int m_nContrast;
-	int m_nDYN;
-	int m_nCGain;
-	int m_nCVarianceThreshold;
-	int m_nPrioSlope;
-	int m_nNoiseOffset;
 
-	//能量数据的动态范围映射表
-	//UINT8 m_DRCurve[MAX_POWER_VALUE];
-
-	// 高低阀值，在旧的自相关算法中使用
-	// AC low threshold
-	int m_nACLowThreshold;
-	// AC high threshold
-	int m_nACHighThreshold;
-	//平滑阶次，在开立的算法中可以分别调节行平滑阶次和列平滑阶次
-	//Velocity Smooth Length
-	int m_nVSLength;
 
 private:
 	// ------------------------------------------------------------
@@ -247,7 +153,8 @@ public:
 	//	pDst_v-输出的速度矩阵指针
 	// Retrun Value	:void
 	// ------------------------------------------------------------
-	void SignalProcess(INT16 *pSrc , INT16 *pDst_v);
+	void SignalProcess(INT16 *pSrc , float *pDst_v);
+	void SignalProcess(INT16 *pSrc , double *pDst_v);
 
 	// ------------------------------------------------------------
 	// Description	:C模式的信号处理，属于DPI模式

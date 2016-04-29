@@ -26,11 +26,11 @@
 static SignalProcess::MultiDeepModeTCDSignalManage objMultiDeepModeTCDSignalManage;
 
 //MultiDeepModeTCD模式的数据帧，解析模块和信号处理模块之间的缓冲，这里仅仅用与采用CSimDataThread仿真Color数据时使用
-//MAX_BLINE_POINTS应该是动态变换的，从数据头文件解析得到
-static PingPangBuffer<INT16> ParsedMultiDeepModeTCDBuffer(sizeof(INT16) * MAXC_ENSEMBLE * MAX_BLINE_POINTS*2);
+//DEEP_POINTS应该是动态变换的，从数据头文件解析得到
+static PingPangBuffer<INT16> ParsedMultiDeepModeTCDBuffer(sizeof(INT16) * MAX_MD_ENSEMBLE * DEEP_POINTS*2);
 
 //MultiDeepModeTCD模式的数据帧，图像处理模块和显示模块之间的缓冲
-static Buffer::CycleBuffer<INT16> MultiDeepModeTCDFrameBuffer(sizeof(INT16) * MAX_BLINE_POINTS);
+static Buffer::CycleBuffer<float> MultiDeepModeTCDFrameBuffer(sizeof(float) * DEEP_POINTS);
 
 // ------------------------------------------------------------
 // Description	:获取解析之后的MultiDeep缓冲区数据
@@ -54,7 +54,6 @@ void * MultiDeepModeTCDGetDataThread(void *)
 	signed short int * pParsedMultiDeepModeTCDFrame = NULL;
 	signed short int * IQData = NULL;
 	char* IQFileName = "/home/ljd/data/IQdata4.dat";
-	int nCnt = 0;
 	int k=0;
 	while (1)
 	{
@@ -69,18 +68,18 @@ void * MultiDeepModeTCDGetDataThread(void *)
 		}
 
 		//读取IQ数据
-		IQData = ReadFile(IQFileName,MAX_BLINE_POINTS,MAXC_ENSEMBLE,k);
+		IQData = ReadFile(IQFileName,DEEP_POINTS,MAX_MD_ENSEMBLE,k);
 		//将IQ数据放到乒乓缓存中
-		for (int i=0;i<MAXC_ENSEMBLE;i++){
-			for (int j =0;j<MAX_BLINE_POINTS;j++){
-				pParsedMultiDeepModeTCDFrame[i*MAX_BLINE_POINTS*2+j*2]=IQData[i*MAX_BLINE_POINTS*2+j*2];
-				pParsedMultiDeepModeTCDFrame[i*MAX_BLINE_POINTS*2+j*2+1]=IQData[i*MAX_BLINE_POINTS*2+j*2+1];
+		for (int i=0;i<MAX_MD_ENSEMBLE;i++){
+			for (int j =0;j<DEEP_POINTS;j++){
+				pParsedMultiDeepModeTCDFrame[i*DEEP_POINTS*2+j*2]=IQData[i*DEEP_POINTS*2+j*2];
+				pParsedMultiDeepModeTCDFrame[i*DEEP_POINTS*2+j*2+1]=IQData[i*DEEP_POINTS*2+j*2+1];
 			}
 
 		}
-		std::cout<<"生产"<<std::endl;
+		//std::cout<<"生产"<<std::endl;
 		//打印乒乓缓存中存储的IQ数据
-		PrintArray(MAX_BLINE_POINTS,MAXC_ENSEMBLE,pParsedMultiDeepModeTCDFrame);
+		//PrintArray(DEEP_POINTS,MAX_MD_ENSEMBLE,pParsedMultiDeepModeTCDFrame);
 		usleep(1000 * 500);
 		SynSem::GetPSSem()->m_Sem_MultiDeepModeTCD.ProducterDone();
 		k++;
@@ -105,10 +104,10 @@ void * MultiDeepModeTCDSignalProcessThread(void*)
 	// MultiDeepModeTCD 从乒乓缓存中读取IQ数据的指针
 	signed short int * pParsedMultiDeepModeTCDData = NULL;
 	//IQ数据处理后生成的速度矩阵
-	signed short int* pParsedMultiDeepModeTCDVelocity = (signed short int*)malloc(MAX_BLINE_POINTS*sizeof(signed short int));
+	float* pParsedMultiDeepModeTCDVelocity = (float*)malloc(DEEP_POINTS*sizeof(float));
 
 	//用于显示的RGB数据
-	signed short int * pParsedMultiDeepModeTCDFrame= NULL;
+	float * pParsedMultiDeepModeTCDFrame= NULL;
 
 	//MultiDeepModeTCDSignalManage
 	while (1)
@@ -123,7 +122,7 @@ void * MultiDeepModeTCDSignalProcessThread(void*)
 			printf( "GetParsedCFrame Failed, in the c mode signal thread\n");
 		}
 		//printf("消费\n");
-		//PrintArray(MAX_BLINE_POINTS,MAXC_ENSEMBLE,pParsedMultiDeepModeTCDData);
+		//PrintArray(DEEP_POINTS,MAXC_ENSEMBLE,pParsedMultiDeepModeTCDData);
 
 		static TimerTest objCTime(100, "MultiDeepModeTCDSignal");
 		//objCTime.CheckFreq();
@@ -143,14 +142,14 @@ void * MultiDeepModeTCDSignalProcessThread(void*)
 		//把数据处理记过保存到显示缓存区中
 		//velocity 到RGB的映射函数
 		//////
-		for(int i = 0;i<MAX_BLINE_POINTS;i++){
+		for(int i = 0;i<DEEP_POINTS;i++){
 			pParsedMultiDeepModeTCDFrame[i]=pParsedMultiDeepModeTCDVelocity[i];
 		}
 		SynSem::GetIDSem()->m_Sem_MultiDeepModeTCD.ProducterDone();
 		///////
 		//printf("显示\n");
 
-		//PrintArray(MAX_BLINE_POINTS,pParsedMultiDeepModeTCDFrame);
+		//PrintArray(DEEP_POINTS,pParsedMultiDeepModeTCDFrame);
 
 		//LOGI( "C Mode SignalProcess  One Frame Done!");
 
@@ -169,7 +168,7 @@ void * MultiDeepModeTCDImageProcessThread(void*)
 	int nCnt = 0;
 
 	//Color Frame
-	signed short int *pMultiDeepModeTCDFrameDisp = NULL;
+	float *pMultiDeepModeTCDFrameDisp = NULL;
 
 
 	while (1)
@@ -186,9 +185,9 @@ void * MultiDeepModeTCDImageProcessThread(void*)
 			//LOGE("GetWritePointer failed in the c mode image thread!");
 			printf("GetReadPointer failed in the GetMultiDeepModeTCD mode image thread!");
 		}
-		printf("显示\n");
+		//printf("显示\n");
 
-		PrintArray(MAX_BLINE_POINTS,pMultiDeepModeTCDFrameDisp);
+		//PrintArray(DEEP_POINTS,pMultiDeepModeTCDFrameDisp);
 
 		SynSem::GetIDSem()->m_Sem_MultiDeepModeTCD.ConsumerDone();
 		//LOGI( "The C mode of imageProcess one frame data done");

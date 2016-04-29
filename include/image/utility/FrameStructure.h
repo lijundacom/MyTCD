@@ -17,7 +17,7 @@ struct MultiDeepModeTCDFrameData
 {
 
 	 struct{
-		 signed char v[MAX_BLINE_POINTS]; //速度数据
+		 signed char v[DEEP_POINTS]; //速度数据
 	 }data;
 };
 struct IQPoint{

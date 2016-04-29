@@ -10,14 +10,10 @@
 #define IMAGEDEF_H_
 
 //--------常用量--------add by wxc 13/6/20-------//
-#define SAMPLE_FREQ (40)
-#define PI (3.14159265)
+#define SAMPLE_FREQ (4000)//采样频率
+#define PI (3.1415926)
 #define SOUND_SPEED (1540)
-
-//--------图像信息-----------------//
-#define MAX_BLINE_LINES	(512)
-#define MAX_BLINE_POINTS (10)
-
+#define TRANSFER_FREQ 2000000 //探头频率
 #define TGC_NUM (8)
 #define MAX_FOCUS_NUM (16)
 
@@ -50,7 +46,7 @@
 #define MAX_MLINE_WIDTH (800)
 // #define DOUBLE_MAXBLINE_LEN 960 //彩色时方便计算
 // #define MAXMULTI_FOCUSNUM 10	// unusd，与 MAX_FOCUS_NUM 重复
- #define MAXC_ENSEMBLE 8
+ //#define MAXC_ENSEMBLE 8
 // #define MAXC_SWEEPNUM 40 //最大的可重复因子,连续扫描C的线号
 // #define MAXPW_WALLFILTERNUM 31
 // #define MAXPW_HILBERTNUM 32
@@ -61,7 +57,6 @@
 
 #define MAX_BCOMPOUND_NUM (7)
 #define MAXBLINE_LEN (480)
-#define MAXC_ENSEMBLE 8
 // #define MAX_BFREQ_NUM 5
 #define BDYN_RANGE_LEN 32768
 //-----------M-------------
@@ -74,7 +69,12 @@
 
 #define MAX_USB_TRANS_B 15
 #define MAX_USB_TRANS_C 20
+
+
 //------------MultiDeepModeTCD-----
-//#define MDTCD_WF_NUM 8//做回归滤波器/自相关的点数
+#define DEEP_POINTS 10 //将采样后每条线有多少个点数
+#define MAX_MD_ENSEMBLE 8 //做回归滤波器/自相关的点数
+
+
 
 #endif /* IMAGEDEF_H_ */
